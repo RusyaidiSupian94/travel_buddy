@@ -1,0 +1,53 @@
+Step create devcontainer
+1 - Create folder with name ".devcontainer"
+2 - Create in folder ".devcontainer" file name "devcontainer.json", "Dockerfile" and "post-create.sh"
+3 - Press "Ctrl + Shift + P", then search "Codespace: Rebuild Container" (this step need to run for new codespace)
+
+Step To Add Program in api folder
+1 - Check .Net version using command terminal, type "dotnet --version" and "dotnet --info"
+2 - Now go to root repos using command "cd /workspace/repo_name"
+3 - Create folder placement api using command "mkdir folder_name"
+4 - Go to assign folder using command "cd folder_name"
+5 - Run command "dotnet new webapi"
+6 - Run command "dotnet restore" and "dotnet build"
+7 - To run webapi is using command "dotnet run"
+8 - The on url add "/weatherforecast" then it will show json "weatherforecast"
+
+Step To Add 
+1 - Check Flutter version using command in terminal, type "flutter --version" and "dart --version"
+2 - Run command "flutter doctor" got warning like "Android SDK", "Android Studio", "Chrome", and "Linux desktop", it normal
+3 - Run command "flutter devices", then run "flutter config --enable-web", it change enable-web to true
+4 - Now go to root repos using command "cd /workspace/repo_name"
+5 - Create folder placement app using command "mkdir folder_name"
+6 - Go to assign folder using command "cd folder_name"
+7 - Run command "flutter create ."
+8 - Run command "flutter run -d web-server --web-port 8080"
+9 - Run command "flutter build web"
+
+Setup Database
+1 - Go to "https://supabase.com/dashboard"
+2 - Login with github
+3 - Add new project in supabase
+4 - After finish, click back on project and find the button with name "connect"
+5 - Click on it, then find tab for "connection string"
+6 - For connection method, choose "session pooler"
+7 - Copy connection string example:
+postgresql://postgres.pdykcdbckvghcsfyhjly:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+change [YOUR-PASSWORD] to real possword you create at project
+8 - Add to the github codespace, open repository then click "settings". find "secrect and variable" then click on "codespace"
+9 - Add name - db and secrect is connection string from supabase
+10 - Need restart the codespace
+11 - Need to run command "echo ${dbname:+Secret available}", if show secret available. if not show need to check "Settings → Secrets and variables → Codespaces"
+12 - Need run command "PGSSLMODE=require psql "$SUPABASE_DB_URL" -c "select current_database(), current_user;""
+
+Check Connection DB
+1 - Run command "cd /workspaces/folder_name", then "find api -maxdepth 3 -name "*.csproj" -print", then "find api -maxdepth 2 -type f | sort | head -80"
+2 - Run commend "cat api/api.csproj", then "sed -n '1,240p' api/Program.cs" to see the output weatherforecast
+3 - Go to api folder, the run command "dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL" to add npgsql in webapi
+4 - For stable version is 10, use command "dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 10.0.3", the run command "dotnet restore"
+5 - To check the package added or not, run command "cat api.csproj", in ItemGroup, it will add package Npgsql
+
+Connect Supabase with Flutter
+1 - Enter app folder then run command "flutter pub add supabase_flutter" and "flutter pub get"
+2 - Open Supabase dashboard -> choose project -> find project settings -> API Keys -> find section Publishable then copy key with sb_publishable
+3 - Find the Project URL at dashboard
