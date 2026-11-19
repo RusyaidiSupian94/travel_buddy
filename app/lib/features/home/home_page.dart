@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../core/app_colors.dart';
 import '../../shared/widgets/content_frame.dart';
@@ -375,7 +375,7 @@ class _DestinationCard extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    AppColors.ink.withOpacity(0.56),
+                    AppColors.ink.withValues(alpha: 0.56),
                   ],
                 ),
               ),
