@@ -12,7 +12,7 @@ class ContentFrame extends StatelessWidget {
       horizontal: 20,
       vertical: 24,
     ),
-    this.maxWidth = 1180,
+    this.maxWidth = double.infinity,
   });
 
   @override

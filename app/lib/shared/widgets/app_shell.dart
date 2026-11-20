@@ -38,28 +38,37 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              AppHeader(
-                currentPage: currentPage,
-                isAuthenticated: isAuthenticated,
-                userName: userName,
-                onNavigate: onNavigate,
-                onOpenCheckout: onOpenCheckout,
-                onLogin: onLogin,
-                onRegister: onRegister,
-                onLogout: onLogout,
-                onProfile: onProfile,
-                onMessages: onMessages,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AppHeader(
+                      currentPage: currentPage,
+                      isAuthenticated: isAuthenticated,
+                      userName: userName,
+                      onNavigate: onNavigate,
+                      onOpenCheckout: onOpenCheckout,
+                      onLogin: onLogin,
+                      onRegister: onRegister,
+                      onLogout: onLogout,
+                      onProfile: onProfile,
+                      onMessages: onMessages,
+                    ),
+                    child,
+                    AppFooter(
+                      onNavigate: onNavigate,
+                      onOpenCheckout: onOpenCheckout,
+                    ),
+                  ],
+                ),
               ),
-              child,
-              AppFooter(
-                onNavigate: onNavigate,
-                onOpenCheckout: onOpenCheckout,
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
