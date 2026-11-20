@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 abstract final class AppColors {
   static const canvas = Color(0xFFF0F4F1);

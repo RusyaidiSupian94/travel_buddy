@@ -3,4 +3,5 @@ enum AppPage {
   guide,
   auth,
   checkout,
+  profile,
 }

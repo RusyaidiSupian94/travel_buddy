@@ -15,4 +15,14 @@ class AppSession {
 
     return trimmedName.substring(0, 1).toUpperCase();
   }
+
+  AppSession copyWith({
+    String? displayName,
+    String? email,
+  }) {
+    return AppSession(
+      displayName: displayName ?? this.displayName,
+      email: email ?? this.email,
+    );
+  }
 }
