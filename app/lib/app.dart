@@ -10,6 +10,7 @@ import 'features/guide/guide_detail_page.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/profile_page.dart';
 import 'shared/widgets/app_shell.dart';
+import 'shared/widgets/sweet_alert.dart';
 
 class TravelBuddyApp extends StatefulWidget {
   const TravelBuddyApp({super.key});
@@ -19,7 +20,7 @@ class TravelBuddyApp extends StatefulWidget {
 }
 
 class _TravelBuddyAppState extends State<TravelBuddyApp> {
-  final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+  final _navigatorKey = GlobalKey<NavigatorState>();
 
   AppPage currentPage = AppPage.home;
   AppSession? _session;
@@ -98,15 +99,42 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     });
   }
 
+  void _handleSocialLogin(String provider) {
+    _showSweetAlert(
+      type: SweetAlertType.info,
+      title: '$provider login',
+      message:
+          'Integrasi $provider memerlukan konfigurasi OAuth dan backend terlebih dahulu.',
+    );
+  }
+
+  void _showSweetAlert({
+    required SweetAlertType type,
+    required String title,
+    required String message,
+  }) {
+    final context = _navigatorKey.currentContext;
+    if (context == null) {
+      return;
+    }
+
+    showAppSweetAlert(
+      context: context,
+      type: type,
+      title: title,
+      message: message,
+    );
+  }
+
   void _handleProfileSaved(AppSession session) {
     setState(() {
       _session = session;
     });
 
-    _messengerKey.currentState?.showSnackBar(
-      const SnackBar(
-        content: Text('Maklumat profil berjaya dikemas kini.'),
-      ),
+    _showSweetAlert(
+      type: SweetAlertType.success,
+      title: 'Profil dikemas kini',
+      message: 'Maklumat profil anda telah berjaya disimpan.',
     );
   }
 
@@ -124,20 +152,19 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
       return;
     }
 
-    _messengerKey.currentState?.showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Login berjaya. Payment gateway perlu disambungkan untuk transaksi sebenar.',
-        ),
-      ),
+    _showSweetAlert(
+      type: SweetAlertType.warning,
+      title: 'Payment belum disambungkan',
+      message:
+          'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
     );
   }
 
   void _showMessagesPlaceholder() {
-    _messengerKey.currentState?.showSnackBar(
-      const SnackBar(
-        content: Text('Mesej customer akan tersedia tidak lama lagi.'),
-      ),
+    _showSweetAlert(
+      type: SweetAlertType.info,
+      title: 'Mesej customer',
+      message: 'Fungsi mesej akan tersedia tidak lama lagi.',
     );
   }
 
@@ -159,6 +186,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
         return AuthGatePage(
           initiallyRegistering: _initiallyRegistering,
           onAuthenticated: _handleAuthenticated,
+          onSocialLogin: _handleSocialLogin,
         );
       case AppPage.checkout:
         final session = _session;
@@ -166,6 +194,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           return AuthGatePage(
             initiallyRegistering: _initiallyRegistering,
             onAuthenticated: _handleAuthenticated,
+            onSocialLogin: _handleSocialLogin,
           );
         }
 
@@ -180,6 +209,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           return AuthGatePage(
             initiallyRegistering: _initiallyRegistering,
             onAuthenticated: _handleAuthenticated,
+            onSocialLogin: _handleSocialLogin,
           );
         }
 
@@ -196,7 +226,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     return MaterialApp(
       title: 'TravelBuddy',
       debugShowCheckedModeBanner: false,
-      scaffoldMessengerKey: _messengerKey,
+      navigatorKey: _navigatorKey,
       theme: AppTheme.light,
       home: AppShell(
         currentPage: currentPage,

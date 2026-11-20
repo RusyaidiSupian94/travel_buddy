@@ -8,10 +8,12 @@ import '../../shared/widgets/mountain_art.dart';
 class AuthGatePage extends StatefulWidget {
   final bool initiallyRegistering;
   final ValueChanged<AppSession> onAuthenticated;
+  final ValueChanged<String> onSocialLogin;
 
   const AuthGatePage({
     super.key,
     required this.onAuthenticated,
+    required this.onSocialLogin,
     this.initiallyRegistering = false,
   });
 
@@ -24,6 +26,7 @@ class _AuthGatePageState extends State<AuthGatePage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   late bool _registering;
   bool _submitting = false;
@@ -47,6 +50,7 @@ class _AuthGatePageState extends State<AuthGatePage> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -101,8 +105,8 @@ class _AuthGatePageState extends State<AuthGatePage> {
         builder: (context, constraints) {
           final compact = constraints.maxWidth < 620;
           final height = compact
-              ? (_registering ? 735.0 : 670.0)
-              : (_registering ? 625.0 : 560.0);
+              ? (_registering ? 880.0 : 800.0)
+              : (_registering ? 760.0 : 660.0);
 
           return MountainArt(
             style: MountainStyle.auth,
@@ -198,7 +202,7 @@ class _AuthGatePageState extends State<AuthGatePage> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 15),
             if (_registering) ...[
               _AuthInput(
                 controller: _nameController,
@@ -242,6 +246,24 @@ class _AuthGatePageState extends State<AuthGatePage> {
                 return null;
               },
             ),
+            if (_registering) ...[
+              const SizedBox(height: 9),
+              _AuthInput(
+                controller: _confirmPasswordController,
+                label: 'Sahkan kata laluan',
+                icon: Icons.lock_reset_outlined,
+                obscureText: true,
+                validator: (value) {
+                  if ((value ?? '').isEmpty) {
+                    return 'Sahkan kata laluan anda';
+                  }
+                  if (value != _passwordController.text) {
+                    return 'Kata laluan tidak sepadan';
+                  }
+                  return null;
+                },
+              ),
+            ],
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -258,6 +280,39 @@ class _AuthGatePageState extends State<AuthGatePage> {
                 ),
               ),
             ),
+            const SizedBox(height: 14),
+            const _AuthDivider(),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _SocialLoginButton(
+                    mark: '',
+                    markColor: Colors.black,
+                    label: 'Apple',
+                    onTap: () => widget.onSocialLogin('Apple'),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: _SocialLoginButton(
+                    mark: 'G',
+                    markColor: const Color(0xFFDB4437),
+                    label: 'Google',
+                    onTap: () => widget.onSocialLogin('Google'),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: _SocialLoginButton(
+                    mark: 'f',
+                    markColor: const Color(0xFF1877F2),
+                    label: 'Facebook',
+                    onTap: () => widget.onSocialLogin('Facebook'),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
             const Text(
               'Akaun diperlukan sebelum anda membuat payment.',
@@ -269,6 +324,84 @@ class _AuthGatePageState extends State<AuthGatePage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AuthDivider extends StatelessWidget {
+  const _AuthDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(child: Divider(color: AppColors.border, height: 1)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+            'atau teruskan dengan',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.muted,
+                  fontSize: 10,
+                ),
+          ),
+        ),
+        const Expanded(child: Divider(color: AppColors.border, height: 1)),
+      ],
+    );
+  }
+}
+
+class _SocialLoginButton extends StatelessWidget {
+  final String mark;
+  final Color markColor;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SocialLoginButton({
+    required this.mark,
+    required this.markColor,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.ink,
+        side: const BorderSide(color: AppColors.border),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            mark,
+            style: TextStyle(
+              color: markColor,
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+              height: 1,
+            ),
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -323,10 +456,10 @@ class _AuthInput extends StatelessWidget {
   const _AuthInput({
     required this.controller,
     required this.label,
-    required this.icon,
     required this.validator,
     this.obscureText = false,
     this.keyboardType,
+    required this.icon,
   });
 
   @override

@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../../core/app_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class BrandMark extends StatelessWidget {
   final double scale;
@@ -12,37 +12,36 @@ class BrandMark extends StatelessWidget {
     this.showName = true,
   });
 
+  static const _assetPath = 'assets/images/travelbuddylogo.svg';
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 23 * scale,
-          height: 23 * scale,
-          decoration: const BoxDecoration(
-            color: AppColors.teal,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.navigation_rounded,
-            color: Colors.white,
-            size: 13 * scale,
-          ),
+    final logo = SvgPicture.asset(
+      _assetPath,
+      width: 170 * scale,
+      height: 51 * scale,
+      fit: BoxFit.contain,
+      alignment: Alignment.centerLeft,
+      semanticsLabel: 'Travel Buddy logo',
+    );
+
+    if (showName) {
+      return logo;
+    }
+
+    return ClipRect(
+      child: SizedBox(
+        width: 45 * scale,
+        height: 45 * scale,
+        child: OverflowBox(
+          alignment: Alignment.centerLeft,
+          minWidth: 170 * scale,
+          maxWidth: 170 * scale,
+          minHeight: 51 * scale,
+          maxHeight: 51 * scale,
+          child: logo,
         ),
-        if (showName) ...[
-          SizedBox(width: 7 * scale),
-          Text(
-            'travelbuddy',
-            style: TextStyle(
-              color: AppColors.ink,
-              fontSize: 12 * scale,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.3,
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 }
