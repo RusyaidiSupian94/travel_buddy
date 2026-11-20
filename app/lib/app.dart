@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import 'core/app_page.dart';
 import 'core/app_session.dart';
@@ -8,6 +8,7 @@ import 'features/booking/booking_draft.dart';
 import 'features/checkout/checkout_page.dart';
 import 'features/guide/guide_detail_page.dart';
 import 'features/home/home_page.dart';
+import 'features/profile/profile_page.dart';
 import 'shared/widgets/app_shell.dart';
 
 class TravelBuddyApp extends StatefulWidget {
@@ -35,6 +36,9 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
         break;
       case AppPage.auth:
         _openAuth(returnPage: currentPage);
+        break;
+      case AppPage.profile:
+        _openProfile();
         break;
       case AppPage.home:
       case AppPage.guide:
@@ -71,6 +75,17 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     });
   }
 
+  void _openProfile() {
+    if (!_isAuthenticated) {
+      _openAuth(returnPage: AppPage.profile);
+      return;
+    }
+
+    setState(() {
+      currentPage = AppPage.profile;
+    });
+  }
+
   void _startBooking() {
     _booking = const BookingDraft.sample();
     _openCheckout();
@@ -81,6 +96,18 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
       _session = session;
       currentPage = _authReturnPage;
     });
+  }
+
+  void _handleProfileSaved(AppSession session) {
+    setState(() {
+      _session = session;
+    });
+
+    _messengerKey.currentState?.showSnackBar(
+      const SnackBar(
+        content: Text('Maklumat profil berjaya dikemas kini.'),
+      ),
+    );
   }
 
   void _logout() {
@@ -147,6 +174,20 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           booking: _booking ?? const BookingDraft.sample(),
           onPay: _handlePayment,
         );
+      case AppPage.profile:
+        final session = _session;
+        if (session == null) {
+          return AuthGatePage(
+            initiallyRegistering: _initiallyRegistering,
+            onAuthenticated: _handleAuthenticated,
+          );
+        }
+
+        return ProfilePage(
+          session: session,
+          onSave: _handleProfileSaved,
+          onLogout: _logout,
+        );
     }
   }
 
@@ -169,6 +210,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           registering: true,
         ),
         onLogout: _logout,
+        onProfile: _openProfile,
         onMessages: _showMessagesPlaceholder,
         child: _pageContent(),
       ),
