@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">Travel Buddy guide and travel logo preview</title>
+  <desc id="desc">A simple three-colour logo showing an A-to-Z travel route on a folded map, with yellow A and Z lettering.</desc>
+
+  <!-- Three-colour palette: navy, cyan, sunny yellow -->
+  <rect x="42" y="42" width="276" height="276" rx="84" fill="#183B56"/>
+
+  <!-- Folded map -->
+  <path d="M82 102l63-20 60 17 73-23v170l-73 22-60-17-63 20V102Z" fill="#00B4D8"/>
+  <path d="M145 82l60 17v169l-60-17V82Z" fill="#00B4D8"/>
+  <path d="M145 82v169M205 99v169" fill="none" stroke="#183B56" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- A-to-Z guide route -->
+  <path d="M108 228C124 219 128 195 143 180C157 165 174 174 188 158C202 142 211 124 235 110" fill="none" stroke="#FFD166" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M225 103L257 93L247 127Z" fill="#FFD166"/>
+  <text x="94" y="251" font-family="Inter, Avenir Next, Arial, sans-serif" font-size="42" font-weight="800" fill="#FFD166">A</text>
+  <text x="246" y="93" font-family="Inter, Avenir Next, Arial, sans-serif" font-size="38" font-weight="800" fill="#FFD166">Z</text>
+
+  <!-- Wordmark -->
+  <text x="370" y="208" font-family="Inter, Avenir Next, Arial, sans-serif" font-size="88" font-weight="800" letter-spacing="-3">
+    <tspan fill="#183B56">Travel</tspan><tspan fill="#00B4D8"> Buddy</tspan>
+  </text>
+  <path d="M374 244h110" stroke="#FFD166" stroke-width="8" stroke-linecap="round"/>
+</svg>
