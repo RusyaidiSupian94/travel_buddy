@@ -15,7 +15,6 @@ class AppFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 70,
       width: double.infinity,
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -23,11 +22,22 @@ class AppFooter extends StatelessWidget {
           top: BorderSide(color: AppColors.border),
         ),
       ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1180),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            '@ 2026 Travel Buddy',
+            style: TextStyle(fontSize: 12, color: AppColors.ink),
+          ),
+          const Text(
+            'Version 1.0.0',
+            style: TextStyle(fontSize: 12, color: AppColors.ink),
+          ),
+        ],
+        // child: ConstrainedBox(
+          // constraints: const BoxConstraints(maxWidth: 1180),
+          // child: Padding(
             // child: Wrap(
             //   alignment: WrapAlignment.spaceBetween,
             //   runSpacing: 14,
@@ -61,8 +71,8 @@ class AppFooter extends StatelessWidget {
             //     ),
             //   ],
             // ),
-          ),
-        ),
+          // ),
+        // ),
       ),
     );
   }
