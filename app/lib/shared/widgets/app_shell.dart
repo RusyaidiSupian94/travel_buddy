@@ -7,13 +7,27 @@ import 'app_header.dart';
 
 class AppShell extends StatelessWidget {
   final AppPage currentPage;
+  final bool isAuthenticated;
+  final String? userName;
   final ValueChanged<AppPage> onNavigate;
+  final VoidCallback onOpenCheckout;
+  final VoidCallback onLogin;
+  final VoidCallback onRegister;
+  final VoidCallback onLogout;
+  final VoidCallback onMessages;
   final Widget child;
 
   const AppShell({
     super.key,
     required this.currentPage,
+    required this.isAuthenticated,
+    required this.userName,
     required this.onNavigate,
+    required this.onOpenCheckout,
+    required this.onLogin,
+    required this.onRegister,
+    required this.onLogout,
+    required this.onMessages,
     required this.child,
   });
 
@@ -27,10 +41,20 @@ class AppShell extends StatelessWidget {
             children: [
               AppHeader(
                 currentPage: currentPage,
+                isAuthenticated: isAuthenticated,
+                userName: userName,
                 onNavigate: onNavigate,
+                onOpenCheckout: onOpenCheckout,
+                onLogin: onLogin,
+                onRegister: onRegister,
+                onLogout: onLogout,
+                onMessages: onMessages,
               ),
               child,
-              AppFooter(onNavigate: onNavigate),
+              AppFooter(
+                onNavigate: onNavigate,
+                onOpenCheckout: onOpenCheckout,
+              ),
             ],
           ),
         ),

@@ -4,15 +4,65 @@ import '../../core/app_colors.dart';
 import '../../core/app_page.dart';
 import 'brand_mark.dart';
 
+enum _HeaderAction {
+  home,
+  guide,
+  checkout,
+  login,
+  register,
+  logout,
+  messages,
+}
+
 class AppHeader extends StatelessWidget {
   final AppPage currentPage;
+  final bool isAuthenticated;
+  final String? userName;
   final ValueChanged<AppPage> onNavigate;
+  final VoidCallback onOpenCheckout;
+  final VoidCallback onLogin;
+  final VoidCallback onRegister;
+  final VoidCallback onLogout;
+  final VoidCallback onMessages;
 
   const AppHeader({
     super.key,
     required this.currentPage,
+    required this.isAuthenticated,
+    required this.userName,
     required this.onNavigate,
+    required this.onOpenCheckout,
+    required this.onLogin,
+    required this.onRegister,
+    required this.onLogout,
+    required this.onMessages,
   });
+
+  void _selectCompactAction(_HeaderAction action) {
+    switch (action) {
+      case _HeaderAction.home:
+        onNavigate(AppPage.home);
+        break;
+      case _HeaderAction.guide:
+        onNavigate(AppPage.guide);
+        break;
+      case _HeaderAction.checkout:
+        onOpenCheckout();
+        break;
+      case _HeaderAction.login:
+        onLogin();
+        break;
+      case _HeaderAction.register:
+        onRegister();
+        break;
+      case _HeaderAction.logout:
+        onLogout();
+        break;
+      case _HeaderAction.messages:
+        onMessages();
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,40 +83,55 @@ class AppHeader extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final compact = constraints.maxWidth < 700;
-                  final signedIn = currentPage == AppPage.checkout;
                   return Row(
                     children: [
                       const BrandMark(),
                       const Spacer(),
                       if (compact)
-                        PopupMenuButton<AppPage>(
+                        PopupMenuButton<_HeaderAction>(
                           tooltip: 'Menu',
                           icon: const Icon(
                             Icons.menu_rounded,
                             color: AppColors.ink,
                           ),
-                          onSelected: onNavigate,
+                          onSelected: _selectCompactAction,
                           itemBuilder: (context) => [
                             const PopupMenuItem(
-                              value: AppPage.home,
+                              value: _HeaderAction.home,
                               child: Text('Jelajah'),
                             ),
                             const PopupMenuItem(
-                              value: AppPage.guide,
+                              value: _HeaderAction.guide,
                               child: Text('Guide'),
                             ),
                             PopupMenuItem(
-                              value: AppPage.checkout,
-                              child: Text(signedIn ? 'Tempahan' : 'Itinerary'),
+                              value: _HeaderAction.checkout,
+                              child: Text(
+                                isAuthenticated ? 'Tempahan' : 'Itinerary',
+                              ),
                             ),
-                            if (!signedIn)
+                            if (isAuthenticated)
                               const PopupMenuItem(
-                                value: AppPage.auth,
+                                value: _HeaderAction.messages,
+                                child: Text('Mesej'),
+                              ),
+                            if (!isAuthenticated) ...[
+                              const PopupMenuItem(
+                                value: _HeaderAction.login,
                                 child: Text('Log masuk'),
+                              ),
+                              const PopupMenuItem(
+                                value: _HeaderAction.register,
+                                child: Text('Daftar'),
+                              ),
+                            ] else
+                              const PopupMenuItem(
+                                value: _HeaderAction.logout,
+                                child: Text('Log keluar'),
                               ),
                           ],
                         )
-                      else if (signedIn) ...[
+                      else if (isAuthenticated) ...[
                         _NavItem(
                           label: 'Jelajah',
                           selected: currentPage == AppPage.home,
@@ -80,17 +145,26 @@ class AppHeader extends StatelessWidget {
                         _NavItem(
                           label: 'Tempahan',
                           selected: currentPage == AppPage.checkout,
-                          onTap: () => onNavigate(AppPage.checkout),
+                          onTap: onOpenCheckout,
                         ),
                         _NavItem(
                           label: 'Mesej',
                           selected: false,
-                          onTap: () => onNavigate(AppPage.checkout),
+                          onTap: onMessages,
                         ),
                         const SizedBox(width: 13),
-                        const _UserAvatar(),
-                      ]
-                      else ...[
+                        PopupMenuButton<_HeaderAction>(
+                          tooltip: 'Akaun',
+                          onSelected: _selectCompactAction,
+                          itemBuilder: (context) => const [
+                            PopupMenuItem(
+                              value: _HeaderAction.logout,
+                              child: Text('Log keluar'),
+                            ),
+                          ],
+                          child: _UserAvatar(userName: userName),
+                        ),
+                      ] else ...[
                         _NavItem(
                           label: 'Jelajah',
                           selected: currentPage == AppPage.home,
@@ -104,16 +178,16 @@ class AppHeader extends StatelessWidget {
                         _NavItem(
                           label: 'Itinerary',
                           selected: currentPage == AppPage.checkout,
-                          onTap: () => onNavigate(AppPage.checkout),
+                          onTap: onOpenCheckout,
                         ),
                         const SizedBox(width: 22),
                         OutlinedButton(
-                          onPressed: () => onNavigate(AppPage.auth),
+                          onPressed: onLogin,
                           child: const Text('Log masuk'),
                         ),
                         const SizedBox(width: 8),
                         FilledButton(
-                          onPressed: () => onNavigate(AppPage.auth),
+                          onPressed: onRegister,
                           child: const Text('Daftar'),
                         ),
                       ],
@@ -130,10 +204,17 @@ class AppHeader extends StatelessWidget {
 }
 
 class _UserAvatar extends StatelessWidget {
-  const _UserAvatar();
+  final String? userName;
+
+  const _UserAvatar({required this.userName});
 
   @override
   Widget build(BuildContext context) {
+    final trimmedName = userName?.trim() ?? '';
+    final label = trimmedName.isEmpty
+        ? 'A'
+        : trimmedName.substring(0, 1).toUpperCase();
+
     return Container(
       width: 31,
       height: 31,
@@ -142,9 +223,9 @@ class _UserAvatar extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: const Text(
-        'A',
-        style: TextStyle(
+      child: Text(
+        label,
+        style: const TextStyle(
           color: Color(0xFF8D5A51),
           fontSize: 11,
           fontWeight: FontWeight.w900,

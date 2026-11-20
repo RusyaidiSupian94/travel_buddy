@@ -5,13 +5,19 @@ import '../../shared/widgets/content_frame.dart';
 import '../../shared/widgets/mountain_art.dart';
 
 class HomePage extends StatelessWidget {
+  final bool isAuthenticated;
+  final String? userName;
   final VoidCallback onGuide;
   final VoidCallback onAuth;
+  final VoidCallback onItinerary;
 
   const HomePage({
     super.key,
+    required this.isAuthenticated,
+    required this.userName,
     required this.onGuide,
     required this.onAuth,
+    required this.onItinerary,
   });
 
   @override
@@ -20,7 +26,11 @@ class HomePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _HeroWithSearch(onGuide: onGuide),
+          _HeroWithSearch(
+            onGuide: onGuide,
+            isAuthenticated: isAuthenticated,
+            userName: userName,
+          ),
           const SizedBox(height: 28),
           _SectionTitle(
             title: 'Popular destinations',
@@ -56,7 +66,10 @@ class HomePage extends StatelessWidget {
             },
           ),
           const SizedBox(height: 22),
-          _BrowseCard(onTap: onAuth),
+          _BrowseCard(
+            onTap: isAuthenticated ? onItinerary : onAuth,
+            isAuthenticated: isAuthenticated,
+          ),
         ],
       ),
     );
@@ -65,8 +78,14 @@ class HomePage extends StatelessWidget {
 
 class _HeroWithSearch extends StatelessWidget {
   final VoidCallback onGuide;
+  final bool isAuthenticated;
+  final String? userName;
 
-  const _HeroWithSearch({required this.onGuide});
+  const _HeroWithSearch({
+    required this.onGuide,
+    required this.isAuthenticated,
+    required this.userName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -93,9 +112,9 @@ class _HeroWithSearch extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'GUEST MODE',
-                            style: TextStyle(
+                          Text(
+                            isAuthenticated ? 'CUSTOMER MODE' : 'GUEST MODE',
+                            style: const TextStyle(
                               color: Color(0xFFC9EEE6),
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
@@ -103,9 +122,11 @@ class _HeroWithSearch extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Cari trip anda',
-                            style: TextStyle(
+                          Text(
+                            isAuthenticated
+                                ? 'Selamat datang, ${userName ?? 'traveller'}'
+                                : 'Cari trip anda',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 25,
                               fontWeight: FontWeight.w900,
@@ -113,9 +134,11 @@ class _HeroWithSearch extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 7),
-                          const Text(
-                            'Explore guide dan itinerary tanpa perlu akaun.',
-                            style: TextStyle(
+                          Text(
+                            isAuthenticated
+                                ? 'Urus itinerary dan teruskan payment dengan akaun anda.'
+                                : 'Explore guide dan itinerary tanpa perlu akaun.',
+                            style: const TextStyle(
                               color: Color(0xFFC9EEE6),
                               fontSize: 12,
                             ),
@@ -375,7 +398,7 @@ class _DestinationCard extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    AppColors.ink.withValues(alpha: 0.56),
+                    AppColors.ink.withOpacity(0.56),
                   ],
                 ),
               ),
@@ -416,8 +439,12 @@ class _DestinationCard extends StatelessWidget {
 
 class _BrowseCard extends StatelessWidget {
   final VoidCallback onTap;
+  final bool isAuthenticated;
 
-  const _BrowseCard({required this.onTap});
+  const _BrowseCard({
+    required this.onTap,
+    required this.isAuthenticated,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -434,19 +461,21 @@ class _BrowseCard extends StatelessWidget {
           final compact = constraints.maxWidth < 540;
           final text = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                'Boleh browse dahulu',
-                style: TextStyle(
+                isAuthenticated ? 'Itinerary anda' : 'Boleh browse dahulu',
+                style: const TextStyle(
                   color: AppColors.ink,
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Text(
-                'Akaun hanya diperlukan untuk tempahan, bayaran dan pengurusan trip.',
-                style: TextStyle(
+                isAuthenticated
+                    ? 'Semak tempahan dan teruskan payment bila-bila masa.'
+                    : 'Akaun hanya diperlukan untuk tempahan, bayaran dan pengurusan trip.',
+                style: const TextStyle(
                   color: AppColors.muted,
                   fontSize: 11,
                 ),
@@ -468,7 +497,9 @@ class _BrowseCard extends StatelessWidget {
                 fontWeight: FontWeight.w900,
               ),
             ),
-            child: const Text('Cara ia berfungsi →'),
+            child: Text(
+              isAuthenticated ? 'Lihat itinerary →' : 'Cara ia berfungsi →',
+            ),
           );
 
           if (compact) {

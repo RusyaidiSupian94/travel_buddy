@@ -1,11 +1,22 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/app_session.dart';
 import '../../shared/widgets/content_frame.dart';
 import '../../shared/widgets/mountain_art.dart';
+import '../booking/booking_draft.dart';
 
 class CheckoutPage extends StatelessWidget {
-  const CheckoutPage({super.key});
+  final AppSession session;
+  final BookingDraft booking;
+  final VoidCallback onPay;
+
+  const CheckoutPage({
+    super.key,
+    required this.session,
+    required this.booking,
+    required this.onPay,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,28 +31,30 @@ class CheckoutPage extends StatelessWidget {
               color: AppColors.mint,
               borderRadius: BorderRadius.circular(11),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.check_circle,
                   color: AppColors.teal,
                   size: 17,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
-                  'Selamat datang, Aina',
-                  style: TextStyle(
+                  'Selamat datang, ${session.displayName}',
+                  style: const TextStyle(
                     color: AppColors.tealDark,
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                SizedBox(width: 5),
-                Text(
-                  'Anda sudah login. Tempahan diteruskan.',
-                  style: TextStyle(
-                    color: AppColors.tealDark,
-                    fontSize: 11,
+                const SizedBox(width: 5),
+                const Expanded(
+                  child: Text(
+                    'Anda sudah login. Tempahan diteruskan.',
+                    style: TextStyle(
+                      color: AppColors.tealDark,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ],
@@ -68,8 +81,11 @@ class CheckoutPage extends StatelessWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 820;
-              final details = const _BookingDetails();
-              final summary = const _SummaryCard();
+              final details = _BookingDetails(booking: booking, onPay: onPay);
+              final summary = _SummaryCard(
+                booking: booking,
+                onPay: onPay,
+              );
 
               if (compact) {
                 return Column(
@@ -84,7 +100,7 @@ class CheckoutPage extends StatelessWidget {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Expanded(child: _BookingDetails()),
+                  Expanded(child: details),
                   const SizedBox(width: 20),
                   SizedBox(width: 330, child: summary),
                 ],
@@ -98,7 +114,13 @@ class CheckoutPage extends StatelessWidget {
 }
 
 class _BookingDetails extends StatelessWidget {
-  const _BookingDetails();
+  final BookingDraft booking;
+  final VoidCallback onPay;
+
+  const _BookingDetails({
+    required this.booking,
+    required this.onPay,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -125,11 +147,11 @@ class _BookingDetails extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 13),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'GUIDE',
                       style: TextStyle(
                         color: AppColors.teal,
@@ -138,27 +160,27 @@ class _BookingDetails extends StatelessWidget {
                         letterSpacing: 0.8,
                       ),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text(
-                      'Private island guide',
-                      style: TextStyle(
+                      booking.serviceName,
+                      style: const TextStyle(
                         color: AppColors.ink,
                         fontSize: 14,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Ahmad Travel Services · 2 guests',
-                      style: TextStyle(
+                      '${booking.vendorName} · ${booking.guestCount} guests',
+                      style: const TextStyle(
                         color: AppColors.muted,
                         fontSize: 10,
                       ),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     Text(
-                      'RM500',
-                      style: TextStyle(
+                      _money(booking.subtotal),
+                      style: const TextStyle(
                         color: AppColors.ink,
                         fontSize: 13,
                         fontWeight: FontWeight.w900,
@@ -183,14 +205,14 @@ class _BookingDetails extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final compact = constraints.maxWidth < 520;
-            final date = const _FormField(
+            final date = _FormField(
               label: 'TARIKH',
-              value: '12 Jun 2025',
+              value: booking.date,
               icon: Icons.calendar_today_outlined,
             );
-            final guests = const _FormField(
+            final guests = _FormField(
               label: 'PESERTA',
-              value: '2 orang',
+              value: '${booking.guestCount} orang',
               icon: Icons.people_outline,
             );
 
@@ -214,16 +236,16 @@ class _BookingDetails extends StatelessWidget {
           },
         ),
         const SizedBox(height: 12),
-        const _FormField(
+        _FormField(
           label: 'LOKASI PICKUP',
-          value: 'Masukkan lokasi meeting point',
+          value: booking.pickupLocation,
           icon: Icons.location_on_outlined,
         ),
         const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: () {},
+            onPressed: onPay,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.coral,
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -296,7 +318,13 @@ class _FormField extends StatelessWidget {
 }
 
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard();
+  final BookingDraft booking;
+  final VoidCallback onPay;
+
+  const _SummaryCard({
+    required this.booking,
+    required this.onPay,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -319,16 +347,27 @@ class _SummaryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const _SummaryRow(label: 'Service', value: 'RM500'),
+          _SummaryRow(
+            label: 'Service',
+            value: _money(booking.subtotal),
+          ),
           const SizedBox(height: 13),
-          const _SummaryRow(label: '2 guests × RM250', value: 'RM500'),
+          _SummaryRow(
+            label: '${booking.guestCount} guests × ${_money(booking.pricePerGuest)}',
+            value: _money(booking.subtotal),
+          ),
+          const SizedBox(height: 13),
+          _SummaryRow(
+            label: 'Platform fee',
+            value: _money(booking.serviceFee),
+          ),
           const SizedBox(height: 17),
           const Divider(color: Color(0x446B9AA1), height: 1),
           const SizedBox(height: 16),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Jumlah',
                 style: TextStyle(
                   color: Colors.white,
@@ -337,8 +376,8 @@ class _SummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                'RM525',
-                style: TextStyle(
+                _money(booking.total),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 23,
                   fontWeight: FontWeight.w900,
@@ -350,7 +389,7 @@ class _SummaryCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () {},
+              onPressed: onPay,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.coral,
                 padding: const EdgeInsets.symmetric(vertical: 13),
@@ -378,13 +417,16 @@ class _SummaryRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFFB9DDD7),
-            fontSize: 10,
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFFB9DDD7),
+              fontSize: 10,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         Text(
           value,
           style: const TextStyle(
@@ -397,3 +439,5 @@ class _SummaryRow extends StatelessWidget {
     );
   }
 }
+
+String _money(int amount) => 'RM$amount';
