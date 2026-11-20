@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 
@@ -39,8 +39,7 @@ class MountainArt extends StatelessWidget {
             CustomPaint(
               painter: _MountainPainter(style),
             ),
-            //if (child != null) child!,
-            child ?? const SizedBox.shrink(),
+            if (child != null) child!,
           ],
         ),
       ),
@@ -147,7 +146,7 @@ class _MountainPainter extends CustomPainter {
 
   Color _sunColorForStyle(MountainStyle value) {
     if (value == MountainStyle.auth) {
-      return const Color(0xFFB9E4D8).withValues(alpha: 0.28);
+      return const Color(0xFFB9E4D8).withOpacity(0.28);
     }
     return const Color(0xFFFFE4A9);
   }
@@ -155,41 +154,41 @@ class _MountainPainter extends CustomPainter {
   Color _farMountainColorForStyle(MountainStyle value) {
     switch (value) {
       case MountainStyle.lavender:
-        return const Color(0xFF7775B4).withValues(alpha: 0.76);
+        return const Color(0xFF7775B4).withOpacity(0.76);
       case MountainStyle.sunset:
-        return const Color(0xFF41616C).withValues(alpha: 0.82);
+        return const Color(0xFF41616C).withOpacity(0.82);
       case MountainStyle.auth:
-        return const Color(0xFF275E6E).withValues(alpha: 0.62);
+        return const Color(0xFF275E6E).withOpacity(0.62);
       default:
-        return const Color(0xFF1E5968).withValues(alpha: 0.78);
+        return const Color(0xFF1E5968).withOpacity(0.78);
     }
   }
 
   Color _frontMountainColorForStyle(MountainStyle value) {
     switch (value) {
       case MountainStyle.lavender:
-        return const Color(0xFF6969AE).withValues(alpha: 0.72);
+        return const Color(0xFF6969AE).withOpacity(0.72);
       case MountainStyle.sunset:
-        return const Color(0xFFC56D63).withValues(alpha: 0.72);
+        return const Color(0xFFC56D63).withOpacity(0.72);
       case MountainStyle.auth:
-        return const Color(0xFF275D6C).withValues(alpha: 0.66);
+        return const Color(0xFF275D6C).withOpacity(0.66);
       default:
-        return const Color(0xFF1D586B).withValues(alpha: 0.78);
+        return const Color(0xFF1D586B).withOpacity(0.78);
     }
   }
 
   Color _foregroundColorForStyle(MountainStyle value) {
     switch (value) {
       case MountainStyle.lavender:
-        return const Color(0xFF555994).withValues(alpha: 0.64);
+        return const Color(0xFF555994).withOpacity(0.64);
       case MountainStyle.sunset:
-        return const Color(0xFF9C5C58).withValues(alpha: 0.52);
+        return const Color(0xFF9C5C58).withOpacity(0.52);
       case MountainStyle.auth:
-        return const Color(0xFF245968).withValues(alpha: 0.5);
+        return const Color(0xFF245968).withOpacity(0.5);
       case MountainStyle.sea:
-        return const Color(0xFF1B6470).withValues(alpha: 0.46);
+        return const Color(0xFF1B6470).withOpacity(0.46);
       default:
-        return const Color(0xFF123F53).withValues(alpha: 0.62);
+        return const Color(0xFF123F53).withOpacity(0.62);
     }
   }
 

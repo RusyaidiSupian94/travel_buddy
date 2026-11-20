@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_page.dart';
@@ -8,6 +8,7 @@ enum _HeaderAction {
   home,
   guide,
   checkout,
+  profile,
   login,
   register,
   logout,
@@ -23,6 +24,7 @@ class AppHeader extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback onRegister;
   final VoidCallback onLogout;
+  final VoidCallback onProfile;
   final VoidCallback onMessages;
 
   const AppHeader({
@@ -35,6 +37,7 @@ class AppHeader extends StatelessWidget {
     required this.onLogin,
     required this.onRegister,
     required this.onLogout,
+    required this.onProfile,
     required this.onMessages,
   });
 
@@ -48,6 +51,9 @@ class AppHeader extends StatelessWidget {
         break;
       case _HeaderAction.checkout:
         onOpenCheckout();
+        break;
+      case _HeaderAction.profile:
+        onProfile();
         break;
       case _HeaderAction.login:
         onLogin();
@@ -110,11 +116,16 @@ class AppHeader extends StatelessWidget {
                                 isAuthenticated ? 'Tempahan' : 'Itinerary',
                               ),
                             ),
-                            if (isAuthenticated)
+                            if (isAuthenticated) ...[
+                              const PopupMenuItem(
+                                value: _HeaderAction.profile,
+                                child: Text('Profil saya'),
+                              ),
                               const PopupMenuItem(
                                 value: _HeaderAction.messages,
                                 child: Text('Mesej'),
                               ),
+                            ],
                             if (!isAuthenticated) ...[
                               const PopupMenuItem(
                                 value: _HeaderAction.login,
@@ -157,6 +168,10 @@ class AppHeader extends StatelessWidget {
                           tooltip: 'Akaun',
                           onSelected: _selectCompactAction,
                           itemBuilder: (context) => const [
+                            PopupMenuItem(
+                              value: _HeaderAction.profile,
+                              child: Text('Profil saya'),
+                            ),
                             PopupMenuItem(
                               value: _HeaderAction.logout,
                               child: Text('Log keluar'),

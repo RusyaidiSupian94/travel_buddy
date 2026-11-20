@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_page.dart';
@@ -14,6 +14,7 @@ class AppShell extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback onRegister;
   final VoidCallback onLogout;
+  final VoidCallback onProfile;
   final VoidCallback onMessages;
   final Widget child;
 
@@ -27,6 +28,7 @@ class AppShell extends StatelessWidget {
     required this.onLogin,
     required this.onRegister,
     required this.onLogout,
+    required this.onProfile,
     required this.onMessages,
     required this.child,
   });
@@ -48,6 +50,7 @@ class AppShell extends StatelessWidget {
                 onLogin: onLogin,
                 onRegister: onRegister,
                 onLogout: onLogout,
+                onProfile: onProfile,
                 onMessages: onMessages,
               ),
               child,
