@@ -8,9 +8,11 @@ import 'app_header.dart';
 class AppShell extends StatelessWidget {
   final AppPage currentPage;
   final bool isAuthenticated;
+  final bool canAccessDashboard;
   final String? userName;
   final ValueChanged<AppPage> onNavigate;
   final VoidCallback onOpenCheckout;
+  final VoidCallback onOpenDashboard;
   final VoidCallback onLogin;
   final VoidCallback onRegister;
   final VoidCallback onLogout;
@@ -22,9 +24,11 @@ class AppShell extends StatelessWidget {
     super.key,
     required this.currentPage,
     required this.isAuthenticated,
+    required this.canAccessDashboard,
     required this.userName,
     required this.onNavigate,
     required this.onOpenCheckout,
+    required this.onOpenDashboard,
     required this.onLogin,
     required this.onRegister,
     required this.onLogout,
@@ -50,9 +54,11 @@ class AppShell extends StatelessWidget {
                     AppHeader(
                       currentPage: currentPage,
                       isAuthenticated: isAuthenticated,
+                      canAccessDashboard: canAccessDashboard,
                       userName: userName,
                       onNavigate: onNavigate,
                       onOpenCheckout: onOpenCheckout,
+                      onOpenDashboard: onOpenDashboard,
                       onLogin: onLogin,
                       onRegister: onRegister,
                       onLogout: onLogout,

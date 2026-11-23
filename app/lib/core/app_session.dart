@@ -1,11 +1,28 @@
+enum AppRole { customer, vendor, admin, superadmin }
+
+extension AppRoleDetails on AppRole {
+  String get label {
+    switch (this) {
+      case AppRole.customer:
+        return 'Customer';
+      case AppRole.vendor:
+        return 'Vendor';
+      case AppRole.admin:
+        return 'Admin';
+      case AppRole.superadmin:
+        return 'Superadmin';
+    }
+  }
+
+  bool get canAccessDashboard => this != AppRole.customer;
+}
+
 class AppSession {
   final String displayName;
   final String email;
+  final AppRole role;
 
-  const AppSession({
-    required this.displayName,
-    required this.email,
-  });
+  const AppSession({required this.displayName, required this.email, this.role = AppRole.customer,});
 
   String get initials {
     final trimmedName = displayName.trim();
@@ -16,13 +33,11 @@ class AppSession {
     return trimmedName.substring(0, 1).toUpperCase();
   }
 
-  AppSession copyWith({
-    String? displayName,
-    String? email,
-  }) {
+  AppSession copyWith({String? displayName, String? email, AppRole? role}) {
     return AppSession(
       displayName: displayName ?? this.displayName,
       email: email ?? this.email,
+      role: role ?? this.role,
     );
   }
 }

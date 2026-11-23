@@ -29,6 +29,7 @@ class _AuthGatePageState extends State<AuthGatePage> {
   final _confirmPasswordController = TextEditingController();
 
   late bool _registering;
+  AppRole _selectedRole = AppRole.customer;
   bool _submitting = false;
 
   @override
@@ -84,6 +85,7 @@ class _AuthGatePageState extends State<AuthGatePage> {
       AppSession(
         displayName: displayName,
         email: email,
+        role: _selectedRole,
       ),
     );
   }
@@ -105,8 +107,8 @@ class _AuthGatePageState extends State<AuthGatePage> {
         builder: (context, constraints) {
           final compact = constraints.maxWidth < 620;
           final height = compact
-              ? (_registering ? 880.0 : 800.0)
-              : (_registering ? 760.0 : 660.0);
+              ? (_registering ? 1050.0 : 900.0)
+              : (_registering ? 900.0 : 760.0);
 
           return MountainArt(
             style: MountainStyle.auth,
@@ -202,6 +204,48 @@ class _AuthGatePageState extends State<AuthGatePage> {
                 ),
               ],
             ),
+            const SizedBox(height: 14),
+            _RolePicker(
+              selected: _selectedRole,
+              onSelected: (role) {
+                setState(() {
+                  _selectedRole = role;
+                });
+              },
+            ),
+            const SizedBox(height: 14),
+            const _AuthDivider(),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _SocialLoginButton(
+                    mark: '',
+                    markColor: Colors.black,
+                    label: 'Apple',
+                    onTap: () => widget.onSocialLogin('Apple'),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: _SocialLoginButton(
+                    mark: 'G',
+                    markColor: const Color(0xFFDB4437),
+                    label: 'Google',
+                    onTap: () => widget.onSocialLogin('Google'),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: _SocialLoginButton(
+                    mark: 'f',
+                    markColor: const Color(0xFF1877F2),
+                    label: 'Facebook',
+                    onTap: () => widget.onSocialLogin('Facebook'),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 15),
             if (_registering) ...[
               _AuthInput(
@@ -280,39 +324,6 @@ class _AuthGatePageState extends State<AuthGatePage> {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
-            const _AuthDivider(),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _SocialLoginButton(
-                    mark: '',
-                    markColor: Colors.black,
-                    label: 'Apple',
-                    onTap: () => widget.onSocialLogin('Apple'),
-                  ),
-                ),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: _SocialLoginButton(
-                    mark: 'G',
-                    markColor: const Color(0xFFDB4437),
-                    label: 'Google',
-                    onTap: () => widget.onSocialLogin('Google'),
-                  ),
-                ),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: _SocialLoginButton(
-                    mark: 'f',
-                    markColor: const Color(0xFF1877F2),
-                    label: 'Facebook',
-                    onTap: () => widget.onSocialLogin('Facebook'),
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 10),
             const Text(
               'Akaun diperlukan sebelum anda membuat payment.',
@@ -325,6 +336,71 @@ class _AuthGatePageState extends State<AuthGatePage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _RolePicker extends StatelessWidget {
+  final AppRole selected;
+  final ValueChanged<AppRole> onSelected;
+
+  const _RolePicker({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'ROLE PREVIEW',
+          style: TextStyle(
+            color: AppColors.muted,
+            fontSize: 9,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 5),
+        const Text(
+          'Pilih role untuk melihat UI dashboard.',
+          style: TextStyle(
+            color: AppColors.muted,
+            fontSize: 10,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: AppRole.values
+              .map(
+                (role) => ChoiceChip(
+                  label: Text(role.label),
+                  selected: selected == role,
+                  onSelected: (_) => onSelected(role),
+                  selectedColor: AppColors.mint,
+                  backgroundColor: const Color(0xFFF7FAF7),
+                  side: BorderSide(
+                    color: selected == role
+                        ? AppColors.teal
+                        : AppColors.border,
+                  ),
+                  labelStyle: TextStyle(
+                    color: selected == role
+                        ? AppColors.tealDark
+                        : AppColors.muted,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                ),
+              )
+              .toList(),
+        ),
+      ],
     );
   }
 }

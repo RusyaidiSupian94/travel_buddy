@@ -6,6 +6,7 @@ import 'core/app_theme.dart';
 import 'features/auth/auth_gate_page.dart';
 import 'features/booking/booking_draft.dart';
 import 'features/checkout/checkout_page.dart';
+import 'features/dashboard/role_dashboard_page.dart';
 import 'features/guide/guide_detail_page.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/profile_page.dart';
@@ -41,6 +42,9 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
       case AppPage.profile:
         _openProfile();
         break;
+      case AppPage.dashboard:
+        _openDashboard();
+        break;
       case AppPage.home:
       case AppPage.guide:
         setState(() {
@@ -50,11 +54,10 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     }
   }
 
-  void _openAuth({
-    required AppPage returnPage,
-    bool registering = false,
-  }) {
-    final destination = currentPage == AppPage.auth ? _authReturnPage : returnPage;
+  void _openAuth({required AppPage returnPage, bool registering = false}) {
+    final destination = currentPage == AppPage.auth
+        ? _authReturnPage
+        : returnPage;
 
     setState(() {
       _authReturnPage = destination;
@@ -87,16 +90,49 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     });
   }
 
+  void _openDashboard() {
+    final session = _session;
+    if (session == null) {
+      _openAuth(returnPage: AppPage.dashboard);
+      return;
+    }
+    if (!session.role.canAccessDashboard) {
+      _showSweetAlert(
+        type: SweetAlertType.warning,
+        title: 'Akses dashboard terhad',
+        message: 'Dashboard hanya tersedia untuk Vendor, Admin dan Superadmin.',
+      );
+      return;
+    }
+    setState(() {
+      currentPage = AppPage.dashboard;
+    });
+  }
+
   void _startBooking() {
     _booking = const BookingDraft.sample();
     _openCheckout();
   }
 
   void _handleAuthenticated(AppSession session) {
+    final dashboardDenied =
+        _authReturnPage == AppPage.dashboard &&
+        !session.role.canAccessDashboard;
+    final destination = dashboardDenied ? AppPage.home : _authReturnPage;
+
     setState(() {
       _session = session;
-      currentPage = _authReturnPage;
+      currentPage = destination;
     });
+
+    if (dashboardDenied) {
+      _showSweetAlert(
+        type: SweetAlertType.warning,
+        title: 'Role belum mempunyai akses',
+        message:
+            'Pilih role Vendor, Admin atau Superadmin untuk membuka dashboard.',
+      );
+    }
   }
 
   void _handleSocialLogin(String provider) {
@@ -155,8 +191,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     _showSweetAlert(
       type: SweetAlertType.warning,
       title: 'Payment belum disambungkan',
-      message:
-          'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
+      message: 'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
     );
   }
 
@@ -165,6 +200,14 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
       type: SweetAlertType.info,
       title: 'Mesej customer',
       message: 'Fungsi mesej akan tersedia tidak lama lagi.',
+    );
+  }
+
+  void _showDashboardAction(String action) {
+    _showSweetAlert(
+      type: SweetAlertType.info,
+      title: action,
+      message: 'UI dashboard demo. Fungsi sebenar memerlukan backend dan permission role.',
     );
   }
 
@@ -179,9 +222,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           onItinerary: _openCheckout,
         );
       case AppPage.guide:
-        return GuideDetailPage(
-          onBook: _startBooking,
-        );
+        return GuideDetailPage(onBook: _startBooking);
       case AppPage.auth:
         return AuthGatePage(
           initiallyRegistering: _initiallyRegistering,
@@ -217,6 +258,29 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           session: session,
           onSave: _handleProfileSaved,
           onLogout: _logout,
+          onDashboard: session.role.canAccessDashboard ? _openDashboard : null,
+        );
+      case AppPage.dashboard:
+        final session = _session;
+        if (session == null) {
+          return AuthGatePage(
+            initiallyRegistering: _initiallyRegistering,
+            onAuthenticated: _handleAuthenticated,
+            onSocialLogin: _handleSocialLogin,
+          );
+        }
+        if (!session.role.canAccessDashboard) {
+          return HomePage(
+            isAuthenticated: true,
+            userName: session.displayName,
+            onGuide: () => _navigate(AppPage.guide),
+            onAuth: () => _openAuth(returnPage: AppPage.home),
+            onItinerary: _openCheckout,
+          );
+        }
+        return RoleDashboardPage(
+          session: session,
+          onAction: _showDashboardAction,
         );
     }
   }
@@ -231,14 +295,13 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
       home: AppShell(
         currentPage: currentPage,
         isAuthenticated: _isAuthenticated,
+        canAccessDashboard: _session?.role.canAccessDashboard ?? false,
         userName: _session?.displayName,
         onNavigate: _navigate,
         onOpenCheckout: _openCheckout,
+        onOpenDashboard: _openDashboard,
         onLogin: () => _openAuth(returnPage: currentPage),
-        onRegister: () => _openAuth(
-          returnPage: currentPage,
-          registering: true,
-        ),
+        onRegister: () => _openAuth(returnPage: currentPage, registering: true),
         onLogout: _logout,
         onProfile: _openProfile,
         onMessages: _showMessagesPlaceholder,

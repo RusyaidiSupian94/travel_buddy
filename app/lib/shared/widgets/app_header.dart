@@ -8,6 +8,7 @@ enum _HeaderAction {
   home,
   guide,
   checkout,
+  dashboard,
   profile,
   login,
   register,
@@ -18,9 +19,11 @@ enum _HeaderAction {
 class AppHeader extends StatelessWidget {
   final AppPage currentPage;
   final bool isAuthenticated;
+  final bool canAccessDashboard;
   final String? userName;
   final ValueChanged<AppPage> onNavigate;
   final VoidCallback onOpenCheckout;
+  final VoidCallback onOpenDashboard;
   final VoidCallback onLogin;
   final VoidCallback onRegister;
   final VoidCallback onLogout;
@@ -31,9 +34,11 @@ class AppHeader extends StatelessWidget {
     super.key,
     required this.currentPage,
     required this.isAuthenticated,
+    required this.canAccessDashboard,
     required this.userName,
     required this.onNavigate,
     required this.onOpenCheckout,
+    required this.onOpenDashboard,
     required this.onLogin,
     required this.onRegister,
     required this.onLogout,
@@ -51,6 +56,9 @@ class AppHeader extends StatelessWidget {
         break;
       case _HeaderAction.checkout:
         onOpenCheckout();
+        break;
+      case _HeaderAction.dashboard:
+        onOpenDashboard();
         break;
       case _HeaderAction.profile:
         onProfile();
@@ -117,6 +125,11 @@ class AppHeader extends StatelessWidget {
                               ),
                             ),
                             if (isAuthenticated) ...[
+                              if (canAccessDashboard)
+                                const PopupMenuItem(
+                                  value: _HeaderAction.dashboard,
+                                  child: Text('Dashboard'),
+                                ),
                               const PopupMenuItem(
                                 value: _HeaderAction.profile,
                                 child: Text('Profil saya'),
@@ -167,12 +180,17 @@ class AppHeader extends StatelessWidget {
                         PopupMenuButton<_HeaderAction>(
                           tooltip: 'Akaun',
                           onSelected: _selectCompactAction,
-                          itemBuilder: (context) => const [
-                            PopupMenuItem(
+                          itemBuilder: (context) => [
+                            if (canAccessDashboard)
+                              const PopupMenuItem(
+                                value: _HeaderAction.dashboard,
+                                child: Text('Dashboard'),
+                              ),
+                            const PopupMenuItem(
                               value: _HeaderAction.profile,
                               child: Text('Profil saya'),
                             ),
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: _HeaderAction.logout,
                               child: Text('Log keluar'),
                             ),

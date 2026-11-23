@@ -1,19 +1,21 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../../../core/app_colors.dart';
-import '../../../core/app_session.dart';
-import '../../../shared/widgets/content_frame.dart';
+import '../../core/app_colors.dart';
+import '../../core/app_session.dart';
+import '../../shared/widgets/content_frame.dart';
 
 class ProfilePage extends StatefulWidget {
   final AppSession session;
   final ValueChanged<AppSession> onSave;
   final VoidCallback onLogout;
+  final VoidCallback? onDashboard;
 
   const ProfilePage({
     super.key,
     required this.session,
     required this.onSave,
     required this.onLogout,
+    this.onDashboard,
   });
 
   @override
@@ -24,7 +26,6 @@ class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
-  bool _saved = false;
 
   @override
   void initState() {
@@ -60,10 +61,6 @@ class _ProfilePageState extends State<ProfilePage> {
         displayName: _nameController.text.trim(),
       ),
     );
-
-    setState(() {
-      _saved = true;
-    });
   }
 
   @override
@@ -81,9 +78,9 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           const SizedBox(height: 5),
-          const Text(
-            'Urus maklumat akaun dan tetapan customer anda.',
-            style: TextStyle(
+          Text(
+            'Urus maklumat ${widget.session.role.label.toLowerCase()} account dan tetapan anda.',
+            style: const TextStyle(
               color: AppColors.muted,
               fontSize: 12,
             ),
@@ -97,9 +94,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 formKey: _formKey,
                 nameController: _nameController,
                 emailController: _emailController,
-                saved: _saved,
                 onSave: _saveProfile,
                 onLogout: widget.onLogout,
+                onDashboard: widget.onDashboard,
               );
 
               if (compact) {
@@ -163,9 +160,9 @@ class _ProfileSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 19),
-          const Text(
-            'CUSTOMER ACCOUNT',
-            style: TextStyle(
+          Text(
+            '${session.role.label.toUpperCase()} ACCOUNT',
+            style: const TextStyle(
               color: Color(0xFFA8D9D1),
               fontSize: 9,
               fontWeight: FontWeight.w900,
@@ -197,18 +194,20 @@ class _ProfileSummary extends StatelessWidget {
               color: const Color(0x1FFFFFFF),
               borderRadius: BorderRadius.circular(9),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.verified_user_outlined,
                   color: Color(0xFFA8D9D1),
                   size: 17,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Akaun aktif untuk membuat tempahan dan payment.',
-                    style: TextStyle(
+                    session.role.canAccessDashboard
+                        ? 'Akaun ${session.role.label} aktif untuk mengurus operasi anda.'
+                        : 'Akaun aktif untuk membuat tempahan dan payment.',
+                    style: const TextStyle(
                       color: Color(0xFFD8F0EB),
                       fontSize: 10,
                       height: 1.35,
@@ -228,17 +227,17 @@ class _ProfileDetails extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController nameController;
   final TextEditingController emailController;
-  final bool saved;
   final VoidCallback onSave;
   final VoidCallback onLogout;
+  final VoidCallback? onDashboard;
 
   const _ProfileDetails({
     required this.formKey,
     required this.nameController,
     required this.emailController,
-    required this.saved,
     required this.onSave,
     required this.onLogout,
+    required this.onDashboard,
   });
 
   @override
@@ -312,25 +311,18 @@ class _ProfileDetails extends StatelessWidget {
                 ),
               ),
             ),
-            if (saved) ...[
-              const SizedBox(height: 10),
-              const Row(
-                children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    color: AppColors.teal,
-                    size: 16,
+            if (onDashboard != null) ...[
+              const SizedBox(height: 11),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onDashboard,
+                  icon: const Icon(Icons.dashboard_outlined, size: 16),
+                  label: const Text('Buka dashboard role'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(43),
                   ),
-                  SizedBox(width: 6),
-                  Text(
-                    'Maklumat profil telah disimpan.',
-                    style: TextStyle(
-                      color: AppColors.tealDark,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
             const SizedBox(height: 18),
