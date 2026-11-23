@@ -150,6 +150,10 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
 
     setState(() {
       _session = session;
+      _apiClient.setAccessToken(
+        session.accessToken,
+        expiresAt: session.accessTokenExpiresAt,
+      );
       currentPage = destination;
     });
 
@@ -213,6 +217,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
   void _logout() {
     setState(() {
       _session = null;
+      _apiClient.clearAccessToken();
       _booking = null;
       _dashboardSection = null;
       currentPage = AppPage.home;

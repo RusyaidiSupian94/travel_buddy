@@ -30,6 +30,14 @@ public static class SeedData
     public static async Task InitializeAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();
+        var environment = scope.ServiceProvider
+            .GetRequiredService<IHostEnvironment>();
+
+        if (!environment.IsDevelopment())
+        {
+            return;
+        }
+
         var database = scope.ServiceProvider
             .GetRequiredService<TravelBuddyDbContext>();
 

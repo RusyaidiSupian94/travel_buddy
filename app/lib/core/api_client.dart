@@ -9,16 +9,50 @@ import 'api_config.dart';
 
 class ApiClient {
   final http.Client _client;
+  String? _accessToken;
+  DateTime? _accessTokenExpiresAt;
 
   ApiClient({http.Client? client}) : _client = client ?? http.Client();
+
+  void setAccessToken(
+    String? accessToken, {
+    DateTime? expiresAt,
+  }) {
+    _accessToken = accessToken;
+    _accessTokenExpiresAt = expiresAt;
+  }
+
+  void clearAccessToken() {
+    _accessToken = null;
+    _accessTokenExpiresAt = null;
+  }
+
+  Map<String, String> _headers({bool json = false}) {
+    final headers = <String, String>{
+      'Accept': 'application/json',
+    };
+
+    if (json) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    final tokenIsValid = _accessToken != null &&
+        _accessToken!.isNotEmpty &&
+        (_accessTokenExpiresAt == null ||
+            DateTime.now().toUtc().isBefore(_accessTokenExpiresAt!));
+
+    if (tokenIsValid) {
+      headers['Authorization'] = 'Bearer $_accessToken';
+    }
+
+    return headers;
+  }
 
   Future<List<TravelService>> getServices() async {
     final response = await _client
         .get(
           Uri.parse('${ApiConfig.baseUrl}/api/services'),
-          headers: const {
-            'Accept': 'application/json',
-          },
+          headers: _headers(),
         )
         .timeout(const Duration(seconds: 10));
 
@@ -72,10 +106,7 @@ class ApiClient {
     final response = await _client
         .post(
           Uri.parse('${ApiConfig.baseUrl}$path'),
-          headers: const {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
+          headers: _headers(json: true),
           body: jsonEncode(body),
         )
         .timeout(const Duration(seconds: 10));

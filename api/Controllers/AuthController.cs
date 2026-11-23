@@ -1,5 +1,9 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TravelBuddy.Api.App.Auth;
 using TravelBuddy.Api.Data;
 using TravelBuddy.Api.Models;
@@ -11,10 +15,17 @@ namespace TravelBuddy.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly TravelBuddyDbContext _database;
+    private readonly IConfiguration _configuration;
+    private readonly IWebHostEnvironment _environment;
 
-    public AuthController(TravelBuddyDbContext database)
+    public AuthController(
+        TravelBuddyDbContext database,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         _database = database;
+        _configuration = configuration;
+        _environment = environment;
     }
 
     [HttpPost("login")]
@@ -66,6 +77,14 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "Role tidak sah." });
         }
 
+        if (!_environment.IsDevelopment() && role != AppRole.Customer)
+        {
+            return BadRequest(new
+            {
+                message = "Role privileged hanya boleh diberikan oleh admin."
+            });
+        }
+
         var email = request.Email.Trim().ToLowerInvariant();
         var existingUser = await _database.Users
             .AnyAsync(item => item.Email == email, cancellationToken);
@@ -91,13 +110,58 @@ public class AuthController : ControllerBase
         return Created(string.Empty, ToResponse(user));
     }
 
-    private static AuthResponse ToResponse(AppUser user)
+    private AuthResponse ToResponse(AppUser user)
     {
+        var token = CreateAccessToken(user, out var expiresAtUtc);
+
         return new AuthResponse(
             user.Id,
             user.DisplayName,
             user.Email,
             user.Role.ToString(),
+            token,
+            expiresAtUtc,
             true);
+    }
+
+    private string CreateAccessToken(
+        AppUser user,
+        out DateTime expiresAtUtc)
+    {
+        var key = _configuration["Jwt:Key"];
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new InvalidOperationException("Jwt:Key is not configured.");
+        }
+
+        var expiresMinutes = int.TryParse(
+            _configuration["Jwt:ExpiresMinutes"],
+            out var configuredMinutes)
+            ? configuredMinutes
+            : 60;
+
+        expiresAtUtc = DateTime.UtcNow.AddMinutes(expiresMinutes);
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.DisplayName),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role.ToString())
+        };
+
+        var signingKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(key));
+        var credentials = new SigningCredentials(
+            signingKey,
+            SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: expiresAtUtc,
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

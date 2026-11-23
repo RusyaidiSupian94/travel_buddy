@@ -18,4 +18,6 @@ public sealed record AuthResponse(
     string DisplayName,
     string Email,
     string Role,
+    string AccessToken,
+    DateTime ExpiresAtUtc,
     bool IsDemo);
