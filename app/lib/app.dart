@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'core/api_client.dart';
 import 'core/app_page.dart';
 import 'core/app_session.dart';
 import 'core/app_theme.dart';
@@ -8,6 +9,7 @@ import 'features/booking/booking_draft.dart';
 import 'features/checkout/checkout_page.dart';
 import 'features/dashboard/role_dashboard_page.dart';
 import 'features/guide/guide_detail_page.dart';
+import 'features/guide/travel_service.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/profile_page.dart';
 import 'shared/widgets/app_shell.dart';
@@ -22,6 +24,8 @@ class TravelBuddyApp extends StatefulWidget {
 
 class _TravelBuddyAppState extends State<TravelBuddyApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
+  late final ApiClient _apiClient;
+  late Future<List<TravelService>> _servicesFuture;
 
   AppPage currentPage = AppPage.home;
   AppSession? _session;
@@ -31,6 +35,25 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
   DashboardSection? _dashboardSection;
 
   bool get _isAuthenticated => _session != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient = ApiClient();
+    _servicesFuture = _apiClient.getServices();
+  }
+
+  @override
+  void dispose() {
+    _apiClient.dispose();
+    super.dispose();
+  }
+
+  void _retryServices() {
+    setState(() {
+      _servicesFuture = _apiClient.getServices();
+    });
+  }
 
   void _navigate(AppPage page) {
     switch (page) {
@@ -55,11 +78,10 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     }
   }
 
-  void _openAuth({
-    required AppPage returnPage,
-    bool registering = false,
-  }) {
-    final destination = currentPage == AppPage.auth ? _authReturnPage : returnPage;
+  void _openAuth({required AppPage returnPage, bool registering = false}) {
+    final destination = currentPage == AppPage.auth
+        ? _authReturnPage
+        : returnPage;
 
     setState(() {
       _authReturnPage = destination;
@@ -121,7 +143,8 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
 
   void _handleAuthenticated(AppSession session) {
     final dashboardDenied =
-        _authReturnPage == AppPage.dashboard && !session.role.canAccessDashboard;
+        _authReturnPage == AppPage.dashboard &&
+        !session.role.canAccessDashboard;
     final destination = dashboardDenied ? AppPage.home : _authReturnPage;
 
     setState(() {
@@ -196,8 +219,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     _showSweetAlert(
       type: SweetAlertType.warning,
       title: 'Payment belum disambungkan',
-      message:
-          'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
+      message: 'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
     );
   }
 
@@ -226,11 +248,11 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           onGuide: () => _navigate(AppPage.guide),
           onAuth: () => _openAuth(returnPage: AppPage.home),
           onItinerary: _openCheckout,
+          servicesFuture: _servicesFuture,
+          onRetryServices: _retryServices,
         );
       case AppPage.guide:
-        return GuideDetailPage(
-          onBook: _startBooking,
-        );
+        return GuideDetailPage(onBook: _startBooking);
       case AppPage.auth:
         return AuthGatePage(
           initiallyRegistering: _initiallyRegistering,
@@ -285,6 +307,8 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
             onGuide: () => _navigate(AppPage.guide),
             onAuth: () => _openAuth(returnPage: AppPage.home),
             onItinerary: _openCheckout,
+            servicesFuture: _servicesFuture,
+            onRetryServices: _retryServices,
           );
         }
 
@@ -313,10 +337,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
         onOpenCheckout: _openCheckout,
         onOpenDashboard: (section) => _openDashboard(section: section),
         onLogin: () => _openAuth(returnPage: currentPage),
-        onRegister: () => _openAuth(
-          returnPage: currentPage,
-          registering: true,
-        ),
+        onRegister: () => _openAuth(returnPage: currentPage, registering: true),
         onLogout: _logout,
         onProfile: _openProfile,
         onMessages: _showRoleMessages,

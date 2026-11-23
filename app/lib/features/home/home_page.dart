@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../core/app_colors.dart';
+import 'api_services_section.dart';
+import '../guide/travel_service.dart';
 import '../../shared/widgets/content_frame.dart';
 import '../../shared/widgets/mountain_art.dart';
 
@@ -10,6 +12,8 @@ class HomePage extends StatelessWidget {
   final VoidCallback onGuide;
   final VoidCallback onAuth;
   final VoidCallback onItinerary;
+  final Future<List<TravelService>>? servicesFuture;
+  final VoidCallback? onRetryServices;
 
   const HomePage({
     super.key,
@@ -18,6 +22,8 @@ class HomePage extends StatelessWidget {
     required this.onGuide,
     required this.onAuth,
     required this.onItinerary,
+    this.servicesFuture,
+    this.onRetryServices,
   });
 
   @override
@@ -70,6 +76,13 @@ class HomePage extends StatelessWidget {
             onTap: isAuthenticated ? onItinerary : onAuth,
             isAuthenticated: isAuthenticated,
           ),
+          if (servicesFuture != null) ...[
+            const SizedBox(height: 24),
+            ApiServicesSection(
+              servicesFuture: servicesFuture!,
+              onRetry: onRetryServices ?? () {},
+            ),
+          ],
         ],
       ),
     );
