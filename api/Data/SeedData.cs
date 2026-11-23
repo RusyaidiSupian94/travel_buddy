@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TravelBuddy.Api.App.Auth;
 using TravelBuddy.Api.Models;
 
 namespace TravelBuddy.Api.Data;
@@ -117,6 +118,11 @@ public static class SeedData
 
         if (existingUser is not null)
         {
+            if (string.IsNullOrWhiteSpace(existingUser.PasswordHash))
+            {
+                existingUser.PasswordHash = PasswordHasher.Hash("password");
+            }
+
             return existingUser;
         }
 
@@ -126,6 +132,7 @@ public static class SeedData
             DisplayName = displayName,
             Email = email,
             Role = role,
+            PasswordHash = PasswordHasher.Hash("password"),
             CreatedAtUtc = createdAtUtc
         };
 

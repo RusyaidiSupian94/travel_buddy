@@ -1,18 +1,21 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_session.dart';
+import '../../core/auth_request.dart';
 import '../../shared/widgets/content_frame.dart';
 import '../../shared/widgets/mountain_art.dart';
 
 class AuthGatePage extends StatefulWidget {
   final bool initiallyRegistering;
   final ValueChanged<AppSession> onAuthenticated;
+  final Future<AppSession> Function(AuthRequest request) onAuthenticate;
   final ValueChanged<String> onSocialLogin;
 
   const AuthGatePage({
     super.key,
     required this.onAuthenticated,
+    required this.onAuthenticate,
     required this.onSocialLogin,
     this.initiallyRegistering = false,
   });
@@ -31,6 +34,7 @@ class _AuthGatePageState extends State<AuthGatePage> {
   late bool _registering;
   AppRole _selectedRole = AppRole.customer;
   bool _submitting = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -65,7 +69,7 @@ class _AuthGatePageState extends State<AuthGatePage> {
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
@@ -79,15 +83,36 @@ class _AuthGatePageState extends State<AuthGatePage> {
 
     setState(() {
       _submitting = true;
+      _errorMessage = null;
     });
 
-    widget.onAuthenticated(
-      AppSession(
-        displayName: displayName,
-        email: email,
-        role: _selectedRole,
-      ),
-    );
+    try {
+      final session = await widget.onAuthenticate(
+        AuthRequest(
+          registering: _registering,
+          displayName: displayName,
+          email: email,
+          password: _passwordController.text,
+          confirmPassword: _confirmPasswordController.text,
+          role: _selectedRole,
+        ),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      widget.onAuthenticated(session);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _submitting = false;
+        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
   }
 
   String _nameFromEmail(String email) {
@@ -306,6 +331,25 @@ class _AuthGatePageState extends State<AuthGatePage> {
                   }
                   return null;
                 },
+              ),
+            ],
+            if (_errorMessage != null) ...[
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE5DF),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(
+                    color: Color(0xFFB95757),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
             const SizedBox(height: 12),

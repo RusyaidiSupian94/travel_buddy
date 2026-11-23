@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'core/api_client.dart';
 import 'core/app_page.dart';
+import 'core/auth_request.dart';
 import 'core/app_session.dart';
 import 'core/app_theme.dart';
 import 'features/auth/auth_gate_page.dart';
@@ -78,10 +79,11 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     }
   }
 
-  void _openAuth({required AppPage returnPage, bool registering = false}) {
-    final destination = currentPage == AppPage.auth
-        ? _authReturnPage
-        : returnPage;
+  void _openAuth({
+    required AppPage returnPage,
+    bool registering = false,
+  }) {
+    final destination = currentPage == AppPage.auth ? _authReturnPage : returnPage;
 
     setState(() {
       _authReturnPage = destination;
@@ -143,8 +145,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
 
   void _handleAuthenticated(AppSession session) {
     final dashboardDenied =
-        _authReturnPage == AppPage.dashboard &&
-        !session.role.canAccessDashboard;
+        _authReturnPage == AppPage.dashboard && !session.role.canAccessDashboard;
     final destination = dashboardDenied ? AppPage.home : _authReturnPage;
 
     setState(() {
@@ -160,6 +161,14 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
             'Pilih role Vendor, Admin atau Superadmin untuk membuka dashboard.',
       );
     }
+  }
+
+  Future<AppSession> _authenticate(AuthRequest request) {
+    if (request.registering) {
+      return _apiClient.register(request);
+    }
+
+    return _apiClient.login(request);
   }
 
   void _handleSocialLogin(String provider) {
@@ -219,7 +228,8 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     _showSweetAlert(
       type: SweetAlertType.warning,
       title: 'Payment belum disambungkan',
-      message: 'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
+      message:
+          'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
     );
   }
 
@@ -252,11 +262,14 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           onRetryServices: _retryServices,
         );
       case AppPage.guide:
-        return GuideDetailPage(onBook: _startBooking);
+        return GuideDetailPage(
+          onBook: _startBooking,
+        );
       case AppPage.auth:
         return AuthGatePage(
           initiallyRegistering: _initiallyRegistering,
           onAuthenticated: _handleAuthenticated,
+          onAuthenticate: _authenticate,
           onSocialLogin: _handleSocialLogin,
         );
       case AppPage.checkout:
@@ -265,6 +278,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           return AuthGatePage(
             initiallyRegistering: _initiallyRegistering,
             onAuthenticated: _handleAuthenticated,
+            onAuthenticate: _authenticate,
             onSocialLogin: _handleSocialLogin,
           );
         }
@@ -280,6 +294,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           return AuthGatePage(
             initiallyRegistering: _initiallyRegistering,
             onAuthenticated: _handleAuthenticated,
+            onAuthenticate: _authenticate,
             onSocialLogin: _handleSocialLogin,
           );
         }
@@ -296,6 +311,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           return AuthGatePage(
             initiallyRegistering: _initiallyRegistering,
             onAuthenticated: _handleAuthenticated,
+            onAuthenticate: _authenticate,
             onSocialLogin: _handleSocialLogin,
           );
         }
@@ -307,8 +323,8 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
             onGuide: () => _navigate(AppPage.guide),
             onAuth: () => _openAuth(returnPage: AppPage.home),
             onItinerary: _openCheckout,
-            servicesFuture: _servicesFuture,
-            onRetryServices: _retryServices,
+          servicesFuture: _servicesFuture,
+          onRetryServices: _retryServices,
           );
         }
 
@@ -337,7 +353,10 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
         onOpenCheckout: _openCheckout,
         onOpenDashboard: (section) => _openDashboard(section: section),
         onLogin: () => _openAuth(returnPage: currentPage),
-        onRegister: () => _openAuth(returnPage: currentPage, registering: true),
+        onRegister: () => _openAuth(
+          returnPage: currentPage,
+          registering: true,
+        ),
         onLogout: _logout,
         onProfile: _openProfile,
         onMessages: _showRoleMessages,

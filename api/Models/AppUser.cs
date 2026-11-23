@@ -14,5 +14,6 @@ public class AppUser
     public string DisplayName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public AppRole Role { get; set; } = AppRole.Customer;
+    public string PasswordHash { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
 }

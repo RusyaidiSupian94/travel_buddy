@@ -12,3 +12,26 @@ Accept: application/json
 
 GET {{TravelBuddy_Api_HostAddress}}/swagger/v1/swagger.json
 Accept: application/json
+
+###
+
+POST {{TravelBuddy_Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "vendor@travelbuddy.test",
+  "password": "password"
+}
+
+###
+
+POST {{TravelBuddy_Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "displayName": "Demo Vendor",
+  "email": "new-vendor@travelbuddy.test",
+  "password": "password",
+  "confirmPassword": "password",
+  "role": "Vendor"
+}
