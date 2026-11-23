@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_page.dart';
+import '../../core/app_session.dart';
 import 'app_footer.dart';
 import 'app_header.dart';
 
@@ -9,15 +10,16 @@ class AppShell extends StatelessWidget {
   final AppPage currentPage;
   final bool isAuthenticated;
   final bool canAccessDashboard;
+  final AppRole role;
   final String? userName;
   final ValueChanged<AppPage> onNavigate;
   final VoidCallback onOpenCheckout;
-  final VoidCallback onOpenDashboard;
+  final ValueChanged<DashboardSection> onOpenDashboard;
   final VoidCallback onLogin;
   final VoidCallback onRegister;
   final VoidCallback onLogout;
   final VoidCallback onProfile;
-  final VoidCallback onMessages;
+  final ValueChanged<AppRole> onMessages;
   final Widget child;
 
   const AppShell({
@@ -25,6 +27,7 @@ class AppShell extends StatelessWidget {
     required this.currentPage,
     required this.isAuthenticated,
     required this.canAccessDashboard,
+    required this.role,
     required this.userName,
     required this.onNavigate,
     required this.onOpenCheckout,
@@ -55,6 +58,7 @@ class AppShell extends StatelessWidget {
                       currentPage: currentPage,
                       isAuthenticated: isAuthenticated,
                       canAccessDashboard: canAccessDashboard,
+                      role: role,
                       userName: userName,
                       onNavigate: onNavigate,
                       onOpenCheckout: onOpenCheckout,

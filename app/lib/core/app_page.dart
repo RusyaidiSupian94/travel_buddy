@@ -6,3 +6,12 @@ enum AppPage {
   profile,
   dashboard,
 }
+
+enum DashboardSection {
+  vendorOverview,
+  vendorAddService,
+  vendorBookings,
+  platformOverview,
+  approvalQueue,
+  systemManagement,
+}

@@ -28,6 +28,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
   BookingDraft? _booking;
   AppPage _authReturnPage = AppPage.home;
   bool _initiallyRegistering = false;
+  DashboardSection? _dashboardSection;
 
   bool get _isAuthenticated => _session != null;
 
@@ -54,10 +55,11 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     }
   }
 
-  void _openAuth({required AppPage returnPage, bool registering = false}) {
-    final destination = currentPage == AppPage.auth
-        ? _authReturnPage
-        : returnPage;
+  void _openAuth({
+    required AppPage returnPage,
+    bool registering = false,
+  }) {
+    final destination = currentPage == AppPage.auth ? _authReturnPage : returnPage;
 
     setState(() {
       _authReturnPage = destination;
@@ -90,12 +92,13 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     });
   }
 
-  void _openDashboard() {
+  void _openDashboard({DashboardSection? section}) {
     final session = _session;
     if (session == null) {
       _openAuth(returnPage: AppPage.dashboard);
       return;
     }
+
     if (!session.role.canAccessDashboard) {
       _showSweetAlert(
         type: SweetAlertType.warning,
@@ -104,7 +107,9 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
       );
       return;
     }
+
     setState(() {
+      _dashboardSection = section;
       currentPage = AppPage.dashboard;
     });
   }
@@ -116,8 +121,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
 
   void _handleAuthenticated(AppSession session) {
     final dashboardDenied =
-        _authReturnPage == AppPage.dashboard &&
-        !session.role.canAccessDashboard;
+        _authReturnPage == AppPage.dashboard && !session.role.canAccessDashboard;
     final destination = dashboardDenied ? AppPage.home : _authReturnPage;
 
     setState(() {
@@ -178,6 +182,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     setState(() {
       _session = null;
       _booking = null;
+      _dashboardSection = null;
       currentPage = AppPage.home;
     });
   }
@@ -191,15 +196,16 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
     _showSweetAlert(
       type: SweetAlertType.warning,
       title: 'Payment belum disambungkan',
-      message: 'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
+      message:
+          'Anda sudah login. Sambungkan payment gateway untuk transaksi sebenar.',
     );
   }
 
-  void _showMessagesPlaceholder() {
+  void _showRoleMessages(AppRole role) {
     _showSweetAlert(
       type: SweetAlertType.info,
-      title: 'Mesej customer',
-      message: 'Fungsi mesej akan tersedia tidak lama lagi.',
+      title: 'Mesej ${role.label}',
+      message: 'Inbox untuk role ${role.label} akan tersedia tidak lama lagi.',
     );
   }
 
@@ -222,7 +228,9 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
           onItinerary: _openCheckout,
         );
       case AppPage.guide:
-        return GuideDetailPage(onBook: _startBooking);
+        return GuideDetailPage(
+          onBook: _startBooking,
+        );
       case AppPage.auth:
         return AuthGatePage(
           initiallyRegistering: _initiallyRegistering,
@@ -269,6 +277,7 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
             onSocialLogin: _handleSocialLogin,
           );
         }
+
         if (!session.role.canAccessDashboard) {
           return HomePage(
             isAuthenticated: true,
@@ -278,8 +287,10 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
             onItinerary: _openCheckout,
           );
         }
+
         return RoleDashboardPage(
           session: session,
+          initialSection: _dashboardSection,
           onAction: _showDashboardAction,
         );
     }
@@ -296,15 +307,19 @@ class _TravelBuddyAppState extends State<TravelBuddyApp> {
         currentPage: currentPage,
         isAuthenticated: _isAuthenticated,
         canAccessDashboard: _session?.role.canAccessDashboard ?? false,
+        role: _session?.role ?? AppRole.customer,
         userName: _session?.displayName,
         onNavigate: _navigate,
         onOpenCheckout: _openCheckout,
-        onOpenDashboard: _openDashboard,
+        onOpenDashboard: (section) => _openDashboard(section: section),
         onLogin: () => _openAuth(returnPage: currentPage),
-        onRegister: () => _openAuth(returnPage: currentPage, registering: true),
+        onRegister: () => _openAuth(
+          returnPage: currentPage,
+          registering: true,
+        ),
         onLogout: _logout,
         onProfile: _openProfile,
-        onMessages: _showMessagesPlaceholder,
+        onMessages: _showRoleMessages,
         child: _pageContent(),
       ),
     );
